@@ -37,11 +37,18 @@ Set the live refresh interval in seconds:
 cargo run -- --live --interval 15
 ```
 
+Set Claude Code transcript retention to 10 years:
+
+```sh
+tokenburn --fix-claude-retention
+```
+
 ## Live Keys
 
 - `q` or `Esc`: quit
 - `Tab` or arrow keys: switch provider
-- `s`: toggle Claude main or subagent usage
+- `s`: cycle Claude views: main, subagents, combined, usage cache
+- `a`: add 10-year Claude transcript retention when prompted
 - `r`: cycle range
 - `p`: pause or resume refresh
 - `?`: show or hide help
@@ -61,8 +68,10 @@ cargo run -- --live --interval 15
 - `Daily Trend`: recent daily burn pattern for the selected range.
 - Claude Code usage is deduplicated by `requestId`, keeping the latest usage record for each request.
 - Claude subagent usage is tracked separately from the main Claude Code totals.
+- Claude usage cache mode shows `~/.claude/stats-cache.json` aggregate `/usage` data separately from transcript-derived charts.
 
 ## Data Sources
 
 - Claude Code: `~/.claude/projects/**/*.jsonl`
+- Claude usage cache: `~/.claude/stats-cache.json`
 - Codex: `~/.codex/sessions/<year>/<month>/<day>/*.jsonl`

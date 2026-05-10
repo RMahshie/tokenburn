@@ -1,9 +1,12 @@
 use chrono::{DateTime, Utc};
 
+use crate::config::ClaudeRetentionStatus;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Tool {
     Claude,
     ClaudeSubagent,
+    ClaudeAll,
     Codex,
 }
 
@@ -12,6 +15,7 @@ impl Tool {
         match self {
             Tool::Claude => "CLAUDE CODE",
             Tool::ClaudeSubagent => "CLAUDE SUBAGENTS",
+            Tool::ClaudeAll => "CLAUDE ALL",
             Tool::Codex => "CODEX",
         }
     }
@@ -20,12 +24,13 @@ impl Tool {
         match self {
             Tool::Claude => "CC",
             Tool::ClaudeSubagent => "CS",
+            Tool::ClaudeAll => "CA",
             Tool::Codex => "CX",
         }
     }
 
     pub fn is_claude(self) -> bool {
-        matches!(self, Tool::Claude | Tool::ClaudeSubagent)
+        matches!(self, Tool::Claude | Tool::ClaudeSubagent | Tool::ClaudeAll)
     }
 }
 
@@ -83,6 +88,10 @@ pub struct ToolSummary {
 pub struct DashboardData {
     pub summaries: Vec<ToolSummary>,
     pub claude_subagents: Option<ToolSummary>,
+    pub claude_combined: Option<ToolSummary>,
+    pub claude_usage_cache: Option<ClaudeUsageCache>,
+    pub claude_available_history: MetricBreakdown,
+    pub claude_retention: Option<ClaudeRetentionStatus>,
     pub generated_at: DateTime<Utc>,
 }
 
@@ -95,4 +104,22 @@ pub enum TimeRange {
         start: DateTime<Utc>,
         end: DateTime<Utc>,
     },
+}
+
+#[derive(Debug, Clone)]
+pub struct ClaudeUsageCache {
+    pub path: std::path::PathBuf,
+    pub version: Option<u64>,
+    pub first_session_date: Option<String>,
+    pub last_computed_date: Option<String>,
+    pub total_messages: Option<u64>,
+    pub total_sessions: Option<u64>,
+    pub total: MetricBreakdown,
+    pub models: Vec<ClaudeModelUsage>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ClaudeModelUsage {
+    pub name: String,
+    pub tokens: MetricBreakdown,
 }

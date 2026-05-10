@@ -8,7 +8,7 @@ use crate::{
     util::{format_tokens, local_timestamp, percent, range_label},
 };
 
-use super::render;
+use super::{app::ClaudeView, render};
 
 pub fn run(data: DashboardData, range: TimeRange) -> Result<()> {
     if !io::stdout().is_terminal() {
@@ -20,8 +20,18 @@ pub fn run(data: DashboardData, range: TimeRange) -> Result<()> {
         viewport: Viewport::Inline(44),
     };
     let mut terminal = Terminal::with_options(backend, options)?;
-    terminal
-        .draw(|frame| render::render(frame, &data, &range, false, false, false, None, false))?;
+    terminal.draw(|frame| {
+        render::render(
+            frame,
+            &data,
+            &range,
+            false,
+            false,
+            false,
+            None,
+            ClaudeView::Main,
+        )
+    })?;
     Ok(())
 }
 

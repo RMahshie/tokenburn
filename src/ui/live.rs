@@ -16,7 +16,10 @@ use crossterm::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 
-use crate::data::{load_dashboard_data, DashboardData, TimeRange};
+use crate::{
+    config,
+    data::{load_dashboard_data, DashboardData, TimeRange},
+};
 
 use super::{app::App, render};
 
@@ -67,7 +70,7 @@ fn run_loop(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App)
                 app.paused,
                 app.show_help,
                 Some(app.active_tab),
-                app.show_claude_subagents,
+                app.claude_view,
             )
         })?;
 
@@ -76,7 +79,13 @@ fn run_loop(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App)
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => app.quit = true,
                     KeyCode::Char('r') => app.cycle_range(),
-                    KeyCode::Char('s') => app.toggle_claude_subagents(),
+                    KeyCode::Char('s') => app.cycle_claude_view(),
+                    KeyCode::Char('a') => {
+                        if app.can_apply_claude_retention() {
+                            app.data.claude_retention =
+                                Some(config::set_claude_retention(config::CLAUDE_RETENTION_DAYS)?);
+                        }
+                    }
                     KeyCode::Char('p') => app.paused = !app.paused,
                     KeyCode::Char('?') => app.show_help = !app.show_help,
                     KeyCode::Tab | KeyCode::Right | KeyCode::Char('l') => app.next_tab(),

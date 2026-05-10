@@ -25,6 +25,12 @@ pub struct Cli {
 
     #[arg(long, default_value_t = 5, help = "Live refresh interval in seconds")]
     pub interval: u64,
+
+    #[arg(
+        long,
+        help = "Set Claude Code cleanupPeriodDays to 3650 days for 10 years of local transcript history"
+    )]
+    pub fix_claude_retention: bool,
 }
 
 #[derive(Debug, Clone, Copy, ValueEnum)]

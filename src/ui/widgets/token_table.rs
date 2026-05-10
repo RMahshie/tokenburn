@@ -361,7 +361,7 @@ impl MetricKind {
 
 fn tool_color(tool: Tool) -> Color {
     match tool {
-        Tool::Claude | Tool::ClaudeSubagent => theme::CLAUDE,
+        Tool::Claude | Tool::ClaudeSubagent | Tool::ClaudeAll => theme::CLAUDE,
         Tool::Codex => theme::CODEX,
     }
 }

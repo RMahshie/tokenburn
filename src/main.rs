@@ -14,6 +14,16 @@ fn main() -> Result<()> {
     color_eyre::install()?;
 
     let cli = Cli::parse();
+    if cli.fix_claude_retention {
+        let status = config::set_claude_retention(config::CLAUDE_RETENTION_DAYS)?;
+        println!(
+            "Set cleanupPeriodDays to {} in {}",
+            config::CLAUDE_RETENTION_DAYS,
+            status.path.display()
+        );
+        return Ok(());
+    }
+
     let range = TimeRange::try_from(&cli)?;
     let data = load_dashboard_data(&range)?;
 

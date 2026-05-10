@@ -4,14 +4,17 @@ use chrono::{DateTime, Duration, Utc};
 use color_eyre::eyre::Result;
 
 use super::{
-    claude, codex, ChartBucket, DashboardData, MetricBreakdown, TimeRange, TokenRecord, Tool,
-    ToolSummary,
+    claude, claude_stats, codex, ChartBucket, DashboardData, MetricBreakdown, TimeRange,
+    TokenRecord, Tool, ToolSummary,
 };
 
 pub fn load_dashboard_data(range: &TimeRange) -> Result<DashboardData> {
     let mut records = claude::load()?;
     records.extend(codex::load()?);
-    Ok(aggregate(&records, range, Utc::now()))
+    let mut data = aggregate(&records, range, Utc::now());
+    data.claude_usage_cache = claude_stats::load()?;
+    data.claude_retention = crate::config::claude_retention_status().ok();
+    Ok(data)
 }
 
 pub fn aggregate(records: &[TokenRecord], range: &TimeRange, now: DateTime<Utc>) -> DashboardData {
@@ -22,10 +25,23 @@ pub fn aggregate(records: &[TokenRecord], range: &TimeRange, now: DateTime<Utc>)
         }
     }
     let claude_subagents = summarize_tool(records, Tool::ClaudeSubagent, range, now);
+    let claude_combined = summarize_tools(
+        records,
+        &[Tool::Claude, Tool::ClaudeSubagent],
+        Tool::ClaudeAll,
+        range,
+        now,
+    );
+    let claude_available_history =
+        sum_available_history(records, &[Tool::Claude, Tool::ClaudeSubagent]);
 
     DashboardData {
         summaries,
         claude_subagents,
+        claude_combined,
+        claude_usage_cache: None,
+        claude_available_history,
+        claude_retention: None,
         generated_at: now,
     }
 }
@@ -36,9 +52,19 @@ fn summarize_tool(
     range: &TimeRange,
     now: DateTime<Utc>,
 ) -> Option<ToolSummary> {
+    summarize_tools(records, &[tool], tool, range, now)
+}
+
+fn summarize_tools(
+    records: &[TokenRecord],
+    tools: &[Tool],
+    summary_tool: Tool,
+    range: &TimeRange,
+    now: DateTime<Utc>,
+) -> Option<ToolSummary> {
     let tool_records: Vec<_> = records
         .iter()
-        .filter(|record| record.tool == tool)
+        .filter(|record| tools.contains(&record.tool))
         .collect();
     if tool_records.is_empty() {
         return None;
@@ -75,12 +101,22 @@ fn summarize_tool(
     };
 
     Some(ToolSummary {
-        tool,
+        tool: summary_tool,
         daily_average: divide_breakdown(&current, day_count),
         percent_change: percent_change(current.total(), previous.total()),
         chart_buckets: build_chart_buckets(&tool_records, start, end, range),
         current,
     })
+}
+
+fn sum_available_history(records: &[TokenRecord], tools: &[Tool]) -> MetricBreakdown {
+    let mut total = MetricBreakdown::default();
+    for record in records {
+        if tools.contains(&record.tool) {
+            total.add_record(record);
+        }
+    }
+    total
 }
 
 fn range_bounds(

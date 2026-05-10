@@ -8,19 +8,34 @@ use ratatui::{
 
 use crate::ui::theme;
 
-pub fn render(frame: &mut Frame, area: Rect, timestamp: &str, is_live: bool) {
+pub fn render(
+    frame: &mut Frame,
+    area: Rect,
+    timestamp: &str,
+    is_live: bool,
+    claude_active: bool,
+    can_apply_retention: bool,
+) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
-        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+        .constraints([Constraint::Min(64), Constraint::Length(46)])
         .split(area);
 
-    let keys = Line::from(vec![
+    let mut key_spans = vec![
         key("q"),
         Span::raw(" Quit   "),
         key("Tab"),
         Span::raw(" Provider   "),
-        key("s"),
-        Span::raw(" Subagents   "),
+    ];
+    if claude_active {
+        key_spans.push(key("s"));
+        key_spans.push(Span::raw(" View   "));
+    }
+    if can_apply_retention {
+        key_spans.push(key("a"));
+        key_spans.push(Span::raw(" 10y   "));
+    }
+    key_spans.extend([
         key("r"),
         Span::raw(" Range   "),
         key("p"),
@@ -28,6 +43,7 @@ pub fn render(frame: &mut Frame, area: Rect, timestamp: &str, is_live: bool) {
         key("?"),
         Span::raw(" Help"),
     ]);
+    let keys = Line::from(key_spans);
     frame.render_widget(
         Paragraph::new(keys).style(Style::new().fg(theme::MUTED)),
         chunks[0],
