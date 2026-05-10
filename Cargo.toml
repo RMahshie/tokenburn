@@ -1,0 +1,18 @@
+[package]
+name = "tokenburn"
+version = "1.0.0"
+edition = "2021"
+description = "Track token usage and burn for Claude Code and Codex"
+license = "MIT"
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde", "clock"] }
+clap = { version = "4.5", features = ["derive"] }
+color-eyre = "0.6"
+crossterm = "0.28"
+dirs = "5.0"
+glob = "0.3"
+ratatui = "0.29"
+rayon = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
