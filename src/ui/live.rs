@@ -71,19 +71,35 @@ fn run_loop(terminal: &mut Terminal<CrosstermBackend<io::Stdout>>, mut app: App)
                 app.show_help,
                 Some(app.active_tab),
                 app.claude_view,
+                app.show_retention_prompt,
             )
         })?;
 
         if event::poll(Duration::from_millis(250))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    KeyCode::Char('q') | KeyCode::Esc => app.quit = true,
+                    KeyCode::Char('q') => app.quit = true,
+                    KeyCode::Esc => {
+                        if app.show_retention_prompt {
+                            app.show_retention_prompt = false;
+                        } else {
+                            app.quit = true;
+                        }
+                    }
                     KeyCode::Char('r') => app.cycle_range(),
                     KeyCode::Char('s') => app.cycle_claude_view(),
-                    KeyCode::Char('a') => {
-                        if app.can_apply_claude_retention() {
+                    KeyCode::Enter | KeyCode::Char('a') => {
+                        if app.show_retention_prompt || app.can_apply_claude_retention() {
                             app.data.claude_retention =
                                 Some(config::set_claude_retention(config::CLAUDE_RETENTION_DAYS)?);
+                            app.show_retention_prompt = false;
+                        }
+                    }
+                    KeyCode::Char('n') => app.show_retention_prompt = false,
+                    KeyCode::Char('d') => {
+                        if app.show_retention_prompt {
+                            config::set_suppress_claude_retention_prompt(true)?;
+                            app.show_retention_prompt = false;
                         }
                     }
                     KeyCode::Char('p') => app.paused = !app.paused,

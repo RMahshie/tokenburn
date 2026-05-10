@@ -30,6 +30,7 @@ pub fn run(data: DashboardData, range: TimeRange) -> Result<()> {
             false,
             None,
             ClaudeView::Main,
+            false,
         )
     })?;
     Ok(())

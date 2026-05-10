@@ -37,6 +37,7 @@ pub struct App {
     pub paused: bool,
     pub quit: bool,
     pub show_help: bool,
+    pub show_retention_prompt: bool,
     pub claude_view: ClaudeView,
     pub active_tab: usize,
     pub interval: Duration,
@@ -45,12 +46,14 @@ pub struct App {
 
 impl App {
     pub fn new(data: DashboardData, range: TimeRange, interval_secs: u64) -> Self {
+        let show_retention_prompt = should_show_retention_prompt(&data);
         Self {
             data,
             range,
             paused: false,
             quit: false,
             show_help: false,
+            show_retention_prompt,
             claude_view: ClaudeView::Main,
             active_tab: 0,
             interval: Duration::from_secs(interval_secs.max(1)),
@@ -89,6 +92,9 @@ impl App {
     }
 
     pub fn cycle_claude_view(&mut self) {
+        if self.show_retention_prompt {
+            return;
+        }
         if self.active_tool() == Some(Tool::Claude) {
             self.claude_view = self.claude_view.next();
         }
@@ -119,4 +125,20 @@ impl App {
                 .as_ref()
                 .is_some_and(|status| status.needs_update)
     }
+}
+
+fn should_show_retention_prompt(data: &DashboardData) -> bool {
+    let has_claude = data
+        .summaries
+        .iter()
+        .any(|summary| summary.tool == Tool::Claude);
+    let needs_retention = data
+        .claude_retention
+        .as_ref()
+        .is_some_and(|status| status.needs_update);
+    let suppressed = crate::config::tokenburn_config()
+        .map(|config| config.suppress_claude_retention_prompt)
+        .unwrap_or(false);
+
+    has_claude && needs_retention && !suppressed
 }

@@ -30,6 +30,7 @@ pub fn render(
     show_help: bool,
     active_tab: Option<usize>,
     claude_view: ClaudeView,
+    show_retention_prompt: bool,
 ) {
     let area = frame.area();
     frame.render_widget(Clear, area);
@@ -123,6 +124,10 @@ pub fn render(
 
     if show_help {
         render_help(frame, centered_rect(58, 11, area));
+    }
+
+    if show_retention_prompt {
+        render_retention_prompt(frame, centered_rect(72, 13, area), data);
     }
 }
 
@@ -401,6 +406,63 @@ fn render_help(frame: &mut Frame, area: Rect) {
         .block(Block::default().borders(Borders::ALL).title(" tokenburn "))
         .style(Style::new().fg(theme::MUTED));
     frame.render_widget(widget, area);
+}
+
+fn render_retention_prompt(frame: &mut Frame, area: Rect, data: &DashboardData) {
+    frame.render_widget(Clear, area);
+    let current = data
+        .claude_retention
+        .as_ref()
+        .and_then(|status| status.cleanup_period_days)
+        .map(|days| format!("{days} days"))
+        .unwrap_or_else(|| "default 30 days".to_string());
+    let text = vec![
+        Line::styled(
+            "Claude Transcript Retention",
+            Style::new().fg(theme::CLAUDE).bold(),
+        ),
+        Line::raw(""),
+        Line::from(vec![
+            Span::styled("Current: ", Style::new().fg(theme::DIM)),
+            Span::styled(current, Style::new().fg(theme::TEXT)),
+        ]),
+        Line::from(vec![
+            Span::styled("Recommended: ", Style::new().fg(theme::DIM)),
+            Span::styled(
+                format!("{} days (10 years)", config::CLAUDE_RETENTION_DAYS),
+                Style::new().fg(theme::CLAUDE).bold(),
+            ),
+        ]),
+        Line::raw(""),
+        Line::styled(
+            "Claude may delete transcript files on startup. Longer retention makes tokenburn's local history more complete.",
+            Style::new().fg(theme::MUTED),
+        ),
+        Line::styled(
+            "Transcripts can contain prompts, tool output, and file excerpts.",
+            Style::new().fg(theme::DIM),
+        ),
+        Line::raw(""),
+        Line::from(vec![
+            key_span("Enter/a"),
+            Span::raw(" Set 10 years   "),
+            key_span("n"),
+            Span::raw(" Not now   "),
+            key_span("d"),
+            Span::raw(" Never show again   "),
+            key_span("Esc"),
+            Span::raw(" Close"),
+        ]),
+    ];
+    let widget = Paragraph::new(text)
+        .block(Block::default().borders(Borders::ALL).title(" tokenburn "))
+        .style(Style::new().fg(theme::MUTED))
+        .wrap(Wrap { trim: true });
+    frame.render_widget(widget, area);
+}
+
+fn key_span(value: &'static str) -> Span<'static> {
+    Span::styled(format!(" {value} "), Style::new().fg(theme::TEXT).bold())
 }
 
 fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
