@@ -5,6 +5,10 @@ edition = "2021"
 description = "Track token usage and burn for Claude Code and Codex"
 license = "MIT"
 
+homepage = "https://github.com/RMahshie/tokenburn"
+repository = "https://github.com/RMahshie/tokenburn"
+readme = "README.md"
+
 [dependencies]
 chrono = { version = "0.4", features = ["serde", "clock"] }
 clap = { version = "4.5", features = ["derive"] }
@@ -16,3 +20,8 @@ ratatui = "0.29"
 rayon = "1.10"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
