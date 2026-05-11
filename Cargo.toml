@@ -1,6 +1,6 @@
 [package]
 name = "tokenburn"
-version = "1.0.1"
+version = "1.0.3"
 edition = "2021"
 description = "Track token usage and burn for Claude Code and Codex"
 license = "MIT"
