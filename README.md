@@ -2,27 +2,39 @@
 
 Track token usage and burn for Claude Code and Codex.
 
-## Run
-
-One-shot mode prints the current dashboard and exits:
+## Install
 
 ```sh
-cargo run
+brew install RMahshie/tap/tokenburn
 ```
 
-Live mode opens the interactive TUI dashboard:
+Or run from source:
 
 ```sh
 cargo run -- --live
 ```
 
+## Usage
+
+One-shot mode prints the current dashboard and exits:
+
+```sh
+tokenburn
+```
+
+Live mode opens the interactive TUI dashboard:
+
+```sh
+tokenburn --live
+```
+
 Use a specific range:
 
 ```sh
-cargo run -- --range 24h
-cargo run -- --range 7d
-cargo run -- --range 30d
-cargo run -- --range lifetime
+tokenburn --range 24h
+tokenburn --range 7d
+tokenburn --range 30d
+tokenburn --range lifetime
 ```
 
 `lifetime` means the locally available logs retained on this machine, not true account lifetime usage.
@@ -30,13 +42,13 @@ cargo run -- --range lifetime
 Use a custom inclusive date range:
 
 ```sh
-cargo run -- --from 2026-05-01 --to 2026-05-09
+tokenburn --from 2026-05-01 --to 2026-05-09
 ```
 
 Set the live refresh interval in seconds:
 
 ```sh
-cargo run -- --live --interval 15
+tokenburn --live --interval 15
 ```
 
 Set Claude Code transcript retention to 10 years:
