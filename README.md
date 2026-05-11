@@ -80,7 +80,6 @@ tokenburn --fix-claude-retention
 - `% Total`: that metric's share of the tool total.
 - `Change vs prior period`: percent change compared with the previous range of the same length.
 - `Daily Trend`: recent daily burn pattern for the selected range.
-- Claude Code usage is deduplicated by `requestId`, keeping the latest usage record for each request.
 - Claude subagent usage is tracked separately from the main Claude Code totals.
 - Claude usage cache mode shows `~/.claude/stats-cache.json` aggregate `/usage` data separately from transcript-derived charts.
 
