@@ -25,6 +25,8 @@ cargo run -- --range 30d
 cargo run -- --range lifetime
 ```
 
+`lifetime` means the locally available logs retained on this machine, not true account lifetime usage.
+
 Use a custom inclusive date range:
 
 ```sh

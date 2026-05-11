@@ -41,7 +41,7 @@ pub fn range_label(range: &TimeRange) -> String {
         TimeRange::LastDays(7) => "7d".to_string(),
         TimeRange::LastDays(30) => "30d".to_string(),
         TimeRange::LastDays(days) => format!("{days}d"),
-        TimeRange::Lifetime => "lifetime".to_string(),
+        TimeRange::Lifetime => "available logs".to_string(),
         TimeRange::Custom { start, end } => {
             format!("{} - {}", start.date_naive(), end.date_naive())
         }

@@ -397,7 +397,7 @@ fn render_help(frame: &mut Frame, area: Rect) {
         Line::raw("Tab / ←→   Switch provider"),
         Line::raw("s          Cycle Claude views: main, subagents, all, usage cache"),
         Line::raw("a          Add Claude 10-year transcript retention when prompted"),
-        Line::raw("r          Cycle range: 24h, 7d, 30d, lifetime"),
+        Line::raw("r          Cycle range: 24h, 7d, 30d, available logs"),
         Line::raw("p          Pause or resume live refresh"),
         Line::raw("?          Toggle this help"),
         Line::raw("q / Esc    Quit"),
